@@ -1,6 +1,13 @@
 # azure_pubsub_react_example
 
 Checkout the code, and update the name of the pubsub and access key in the code.
+Update values correctly in variables
+
+`ACCESS_KEY_VALUE = ""`
+
+`PUBSUB_NAME = ""`
+
+in file `azure_pubsub_react_example/back_end/run_server.py`
 
 ![Change_access_keys](./images/change_required_key.png)
 
