@@ -5,40 +5,76 @@ import { WebPubSubClient } from "@azure/web-pubsub-client";
 
 function AzurePubSubTest() {
 
-    const [user, setUser] = useState("");
-    const [message, setMessage] = useState("");
+    const [isConnectionStarted, setConnectionStarted] = useState(false);
+    const [groupName, setGroupName] = useState("");
+
     const [chats, setChats] = useState([]);
     const [connected, setConnected] = useState(false);
     const [client, setClient] = useState(null);
 
-    const [userID, setUserID] = useState('');
+    const [userID, setUserID] = useState(2);
 
     const handleUserIDChange = event => {
         setUserID(event.target.value);
     };
 
+    // If we want to call connect function automatically.
+    // Uncomment the following useEffect function
+
+    // useEffect(() => {
+    //     // async function. only runs once
+    //     console.log('useEffect ran');
+    //     connect();
+    //   }, []); 
+
     async function connect() {
         console.log("Trying to connect...")
-        // let req_promise = (await fetch("http://localhost:3010/api3")).json();
-        // req_promise.then(val => {
-        //     let req_url = val.token_url;
-        //     console.log(req_url);
-        // });
-        // return;
 
-        let reqUrl = "http://localhost:3010/negotiate?user_id=" + userID
+        let reqUrlGroupName = "http://localhost:3010/group_name?user_id=" + userID;
+        // Call the api to get token result
+        let api_resp_txt = (await fetch(reqUrlGroupName)).json();
+
+        // Need to await to get json result from promise
+        let result = await api_resp_txt;
+        let reqGroupName = result.group_name;
+        setGroupName(reqGroupName);
+        console.log("Group name is ::", groupName, "::", reqGroupName);
+        console.log(isConnectionStarted)
+        
+        if (isConnectionStarted) {
+            // Avoid duplicate connection
+            return;
+        }
+
+        let reqUrl = "http://localhost:3010/negotiate?user_id=" + userID;
+
         let client = new WebPubSubClient({
             getClientAccessUrl: async () => {
-                let api_resp_txt = (await fetch(reqUrl)).text();
-                let api_resp = JSON.parse(api_resp_txt);
-                let req_url = api_resp.token_url;
-                console.log(req_url);
-                // let req_url = api_resp_txt;
+                setConnectionStarted(true);
+
+                // Call the api to get token result
+                let api_resp_txt = (await fetch(reqUrl)).json();
+                
+                // Need to await to get json result from promise
+                let result = await api_resp_txt;
+
+                let req_url;
+                req_url = result.token_url;
+                // console.log(req_url);
                 return req_url;
             },
         });
+         
+        client.on("server-message", (e) => {
+            let data;
+            data = e.message.data;
+            console.log("server-message received...", data, e)
+            // data = {};
+            // appendMessage(data);
+        });
 
         client.on("group-message", (e) => {
+            // Will be called, if we are sending group message
             let data;
             data = e.message.data;
             console.log("gm-message received...", data, e)
@@ -50,19 +86,17 @@ function AzurePubSubTest() {
             console.log(`Connected: ${e.connectionId}.`);
         });
 
-        // client.on("server-message", (e) => {
-        //     let data;
-        //     data = e.message.data;
-        //     console.log(data);
-        //     appendMessage(data);
-        // });
-
         function appendMessage(data) {
             setChats((prev) => [...prev, data]);
         }
 
         await client.start();
-        await client.joinGroup("testgroup");
+        console.log("groupName", reqGroupName);
+        if (reqGroupName === undefined || reqGroupName === null || reqGroupName === "") {
+            throw "Group name is invalid. Please check again";
+        }
+
+        // await client.joinGroup(reqGroupName);
         setConnected(true);
         setClient(client);
     }

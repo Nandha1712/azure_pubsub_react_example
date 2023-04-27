@@ -7,9 +7,15 @@ import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <AzurePubSubTest />
-  </React.StrictMode>
+  // Strict mode cause useEffect to run twice in development mode.
+  // So commented following 3 lines.
+
+  // <React.StrictMode>
+  //   <AzurePubSubTest />
+  // </React.StrictMode>
+
+<AzurePubSubTest />
+
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -14,7 +14,6 @@ from custom_logger import create_logger
 
 CORS_ALLOWED_DOMAINS = {r"/*": {"origins": ["http://localhost:3000/*"]}}
 HUB_NAME = "Hub"
-TEST_GROUP = "testgroup"
 
 ACCESS_KEY_VALUE = ""
 PUBSUB_NAME = ""
@@ -30,6 +29,10 @@ app_api = Blueprint(blueprint_name, __name__)
 logger = create_logger(app_name)
 
 
+def get_req_group_name():
+    return "testgroup"
+
+
 @app_api.route('/', methods=['GET'])
 def api0():
     logger.info("API call received: /")
@@ -43,20 +46,34 @@ def api1():
     user_id = request.args.get('user_id')
     service = WebPubSubServiceClient.from_connection_string(CXN_STR, hub=HUB_NAME)
 
-    # group_name = TEST_GROUP
-    group_name = user_id
+    # group_name = user_id
+    group_name = get_req_group_name()
 
-    token = service.get_client_access_token(user_id = 2, roles=[
-        f"webpubsub.sendToGroup.{group_name}",
-        f"webpubsub.joinLeaveGroup.{group_name}"
-    ]);
+    required_roles = [f"webpubsub.sendToGroup.{group_name}", 
+                      f"webpubsub.joinLeaveGroup.{group_name}"
+                      ]
+
+    token = service.get_client_access_token(user_id=user_id, roles=required_roles);
 
     req_url = token['url']
-    # req_url = "abcd"
     data = {"code": 200, "source": "api3", "message": "This service 2",
+            "group_name": group_name,
             "token_url": req_url}
 
     logger.error(req_url)
+    return jsonify(data)
+
+@app_api.route('/group_name', methods=['GET'])
+def get_group_name():
+    logger.info("API call received: fetch group name")
+
+    user_id = request.args.get('user_id')
+
+    # group_name = user_id
+    group_name = get_req_group_name()
+
+    data = {"code": 200, "group_name": group_name, 
+            "user_id": user_id, "message": "group_name is fetched successfully"}
     return jsonify(data)
 
 
@@ -78,11 +95,10 @@ def api2():
     if user_id is None or str(user_id).strip() == "":
         return jsonify({"code": 403, "message": "Given User id is not valid"})
 
-    # group_name = TEST_GROUP
-    group_name = user_id
-    res = req_client.send_to_group(group_name, data_to_send);
+    # group_name = get_req_group_name()
+    # res = req_client.send_to_group(group_name, data_to_send);
 
-    # res = req_client.send_to_all(message=data_to_send)
+    res = req_client.send_to_user(user_id=user_id, message=data_to_send)
 
     logger.info(res)
     data = {"code": 200, "source": "send_data", "message": "This service 2"}
