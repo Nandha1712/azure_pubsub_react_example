@@ -40,4 +40,8 @@ Click `Connect` button in react UI to establish connection.
 
 
 To send data from backend to frontend, hit the following API
-`http://127.0.0.1:3010/send_data`
+Pass the user_id with correct input value given by user during registering process
+
+`http://127.0.0.1:3010/send_data?user_id=2`
+
+`curl localhost:3010/send_data?user_id=2`
