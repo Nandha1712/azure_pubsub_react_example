@@ -52,6 +52,9 @@ def api1():
                       f"webpubsub.joinLeaveGroup.{group_name}"
                       ]
 
+    # If we are sending group message, then following line should be 
+    # uncommented
+
     # token = service.get_client_access_token(user_id=user_id, roles=required_roles);
     token = service.get_client_access_token(user_id=user_id)
 

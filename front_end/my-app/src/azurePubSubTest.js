@@ -74,7 +74,10 @@ function AzurePubSubTest() {
         });
 
         client.on("group-message", (e) => {
-            // Will be called, if we are sending group message
+            // Will be called, if we are sending group message in backend
+            // To receive group message, uncomment client.joinGroup 
+            // line in this file
+            // Also give correct roles while negotiating api
             let data;
             data = e.message.data;
             console.log("gm-message received...", data, e)
