@@ -46,14 +46,14 @@ def api1():
     user_id = request.args.get('user_id')
     service = WebPubSubServiceClient.from_connection_string(CXN_STR, hub=HUB_NAME)
 
-    # group_name = user_id
-    group_name = get_req_group_name()
 
+    group_name = get_req_group_name()
     required_roles = [f"webpubsub.sendToGroup.{group_name}", 
                       f"webpubsub.joinLeaveGroup.{group_name}"
                       ]
 
-    token = service.get_client_access_token(user_id=user_id, roles=required_roles);
+    # token = service.get_client_access_token(user_id=user_id, roles=required_roles);
+    token = service.get_client_access_token(user_id=user_id)
 
     req_url = token['url']
     data = {"code": 200, "source": "api3", "message": "This service 2",

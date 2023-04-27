@@ -70,7 +70,7 @@ function AzurePubSubTest() {
             data = e.message.data;
             console.log("server-message received...", data, e)
             // data = {};
-            // appendMessage(data);
+            appendMessage(data);
         });
 
         client.on("group-message", (e) => {
