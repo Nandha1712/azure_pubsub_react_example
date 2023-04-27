@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, request
 from flask import jsonify
 from flask_cors import CORS
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
@@ -40,20 +40,24 @@ def api0():
 @app_api.route('/negotiate', methods=['GET'])
 def api1():
     logger.info("API call received: /api3")
+    user_id = request.args.get('user_id')
     service = WebPubSubServiceClient.from_connection_string(CXN_STR, hub=HUB_NAME)
-    
+
+    # group_name = TEST_GROUP
+    group_name = user_id
+
     token = service.get_client_access_token(user_id = 2, roles=[
-        f"webpubsub.sendToGroup.{TEST_GROUP}",
-        f"webpubsub.joinLeaveGroup.{TEST_GROUP}"
+        f"webpubsub.sendToGroup.{group_name}",
+        f"webpubsub.joinLeaveGroup.{group_name}"
     ]);
 
     req_url = token['url']
     # req_url = "abcd"
     data = {"code": 200, "source": "api3", "message": "This service 2",
             "token_url": req_url}
-    # return jsonify(data)
+
     logger.error(req_url)
-    return req_url
+    return jsonify(data)
 
 
 @app_api.route('/send_data', methods=['GET'])
@@ -70,7 +74,13 @@ def api2():
         'time': str(datetime.utcnow())
     }
 
-    res = req_client.send_to_group(TEST_GROUP, data_to_send);
+    user_id = request.args.get('user_id')
+    if user_id is None or str(user_id).strip() == "":
+        return jsonify({"code": 403, "message": "Given User id is not valid"})
+
+    # group_name = TEST_GROUP
+    group_name = user_id
+    res = req_client.send_to_group(group_name, data_to_send);
 
     # res = req_client.send_to_all(message=data_to_send)
 

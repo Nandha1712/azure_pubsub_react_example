@@ -11,6 +11,12 @@ function AzurePubSubTest() {
     const [connected, setConnected] = useState(false);
     const [client, setClient] = useState(null);
 
+    const [userID, setUserID] = useState('');
+
+    const handleUserIDChange = event => {
+        setUserID(event.target.value);
+    };
+
     async function connect() {
         console.log("Trying to connect...")
         // let req_promise = (await fetch("http://localhost:3010/api3")).json();
@@ -20,13 +26,14 @@ function AzurePubSubTest() {
         // });
         // return;
 
+        let reqUrl = "http://localhost:3010/negotiate?user_id=" + userID
         let client = new WebPubSubClient({
             getClientAccessUrl: async () => {
-                let api_resp_txt = (await fetch("http://localhost:3010/negotiate")).text();
-                // let api_resp = JSON.parse(api_resp_txt);
-                // let req_url = api_resp.token_url;
-                // console.log(req_url);
-                let req_url = api_resp_txt;
+                let api_resp_txt = (await fetch(reqUrl)).text();
+                let api_resp = JSON.parse(api_resp_txt);
+                let req_url = api_resp.token_url;
+                console.log(req_url);
+                // let req_url = api_resp_txt;
                 return req_url;
             },
         });
@@ -63,6 +70,17 @@ function AzurePubSubTest() {
     return (
         <>
             <div>Hello World</div>
+            <div>
+                <input
+                    type="text"
+                    id="userID"
+                    name="userID"
+                    onChange={handleUserIDChange}
+                    value={userID}
+                />
+
+                <h2>User id is: {userID}</h2>
+            </div>
 
             <div className="input-group-append">
                 <button
@@ -73,16 +91,16 @@ function AzurePubSubTest() {
                 >
                     Connect
                 </button>
-                <br/>
-                <br/>
+                <br />
+                <br />
                 <div>Messages: </div>
-                <br/>
-                {chats.map(curr_val=>{
+                <br />
+                {chats.map(curr_val => {
                     return (<div key={JSON.stringify(curr_val)}>
-                                <div>{JSON.stringify(curr_val)}</div>
-                                <br></br>
-                            </div>
-                            )
+                        <div>{JSON.stringify(curr_val)}</div>
+                        <br></br>
+                    </div>
+                    )
                 })}
             </div>
         </>
