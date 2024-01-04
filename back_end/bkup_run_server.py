@@ -33,6 +33,13 @@ def get_req_group_name():
     return "testgroup"
 
 
+@app_api.route('/', methods=['GET'])
+def api0():
+    logger.info("API call received: /")
+    data = {"code": 200, "source": "api1", "message": "This service 2"}
+    return jsonify(data)
+
+
 @app_api.route('/negotiate', methods=['GET'])
 def api1():
     logger.info("API call received: /api3")
