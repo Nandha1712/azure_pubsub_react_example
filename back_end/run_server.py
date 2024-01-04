@@ -29,8 +29,7 @@ app_api = Blueprint(blueprint_name, __name__)
 logger = create_logger(app_name)
 
 
-def get_req_group_name():
-    return "testgroup"
+
 
 
 @app_api.route('/negotiate', methods=['GET'])
